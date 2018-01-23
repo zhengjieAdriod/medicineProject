@@ -84,7 +84,7 @@ DATABASES = {
     # }
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'we_novel',
+        'NAME': 'medicine',
         'USER': 'root',
         'PASSWORD': 'root',
         'HOST': '',
@@ -130,6 +130,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
+MEDIA_ROOT = BASE_DIR + '/media/'  # BASE_DIR 是项目所在的目录，这样文件就会存储在当前的开发目录下的一个`media`的文件夹下
 
 # REST_FRAMEWORK 有关的, 后加的为了实现返回合适的Json数据格式
 REST_FRAMEWORK = {
