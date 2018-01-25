@@ -1,4 +1,5 @@
-from django.shortcuts import render  # 用来渲染html
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.shortcuts import render, get_object_or_404  # 用来渲染html
 
 # Create your views here.
 from rest_framework.decorators import api_view, permission_classes
@@ -25,3 +26,42 @@ def get_objects(request):
     rf = sData.get("followers")  # 可以拿到Subject对象下的list字段(任何字段),因为sData是序列化后的字典
     sDatas = subjects_serializer.data
     return Response({"code": "200", "subject": sData, "subjects": sDatas})
+
+
+# 分页
+@api_view(['GET'])
+@permission_classes((AllowAny,))
+def get_subjects(request):
+    page_size = 0
+    page_num = 0
+    total_page = 0
+
+    try:
+        subjects = Subject.objects.all()
+        disease_type = request.GET.get("disease")  # 疾病名称
+        if disease_type is not None:  # 疾病分类
+            subjects = subjects.filter(disease_type=disease_type)
+        page = request.GET.get("page")
+        if page is not None:  # 分页
+            paginator = Paginator(subjects, 1)  # 每页显示 2 条数据
+            page_size = paginator.per_page  # 每页几条数据
+            total_page = paginator.num_pages  # 一共多少页数据
+            subjects = paginator.page(page)
+        subjects_serializer = SubjectSerializer(subjects, many=True)
+        return Response({"code": "200", "page_size": page_size, "page_num": page_num, "total_page": total_page,
+                         "subject_list": subjects_serializer.data})
+    except PageNotAnInteger:
+        return Response({"code": "400", "error_msg": "访问出错"})
+    except EmptyPage:
+        return Response({"code": "400", "error_msg": "该页数据为空"})
+
+
+@api_view(['GET'])
+@permission_classes((AllowAny,))
+def detail(request, pk):
+    subject_json = {}
+    subjects = Subject.objects.filter(pk=pk)
+    if len(subjects) > 0:
+        subjects_serializer = SubjectSerializer(subjects[0], many=False)
+        subject_json = subjects_serializer.data
+    return Response({"code": "200", "subject": subject_json})

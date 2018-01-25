@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 from django.utils.encoding import python_2_unicode_compatible
 
 
@@ -115,10 +116,16 @@ class Subject(models.Model):
     # 点赞
     praise = models.IntegerField(blank=True, default=0)
     # 顶置
-    top = models.OneToOneField(Top, null=True, blank=True)
+    top = models.ForeignKey(Top, null=True, blank=True)
 
     def __str__(self):
         return self.disease_type
+
+        # 自定义 get_absolute_url 方法
+        # 记得从 django.urls 中导入 reverse 函数
+
+    def get_absolute_url(self):
+        return reverse('medicine:detail', kwargs={'pk': self.pk})
 
     class Meta:
         ordering = ['-created_time']
