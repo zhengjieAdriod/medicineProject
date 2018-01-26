@@ -1,3 +1,5 @@
+import json
+
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render, get_object_or_404  # 用来渲染html
 
@@ -65,3 +67,19 @@ def detail(request, pk):
         subjects_serializer = SubjectSerializer(subjects[0], many=False)
         subject_json = subjects_serializer.data
     return Response({"code": "200", "subject": subject_json})
+
+
+@api_view(['POST'])
+@permission_classes((AllowAny,))
+def add_new_subject(request):  # 只是新增主题, 不涉及图片
+    data = request.data
+    # 获得文件
+    # file_dic = request.FILES.dict()
+    res_json = data['res']
+    post_dic = json.loads(res_json)  # 反序列化,将json串转为字典
+    subject_dic = post_dic["subject"]
+    describe_str = subject_dic["describe"]
+    initiator_dic = subject_dic["initiator"]
+    name = initiator_dic["name"]
+
+    return Response({"code": "200", "subject": ""})
