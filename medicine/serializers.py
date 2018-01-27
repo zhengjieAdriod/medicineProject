@@ -7,7 +7,7 @@ from medicine.models import Subject, User, Crowd, Task, TaskProgress, Top
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ('name', 'telephone', 'age', 'address',)
+        fields = ('pk','name', 'telephone', 'age', 'address',)
 
 
 # class UserFollowerSerializer(serializers.HyperlinkedModelSerializer):
@@ -28,7 +28,7 @@ class CrowdSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Crowd
-        fields = ('crowd_funding', 'crowd_progress', 'crowd_providers',)
+        fields = ('pk', 'crowd_funding', 'crowd_progress', 'crowd_providers',)
 
 
 class TaskSerializer(serializers.HyperlinkedModelSerializer):
@@ -36,7 +36,7 @@ class TaskSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Task
-        fields = ('task_outline', 'task_deadline', 'task_executors', 'task_start_time', 'task_state',)
+        fields = ('pk', 'task_outline', 'task_deadline', 'task_executors', 'task_start_time', 'task_state',)
 
 
 class TaskProgressSerializer(serializers.HyperlinkedModelSerializer):
@@ -62,5 +62,5 @@ class SubjectSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Subject
-        fields = ('initiator', 'followers', 'origin_from', 'describe', 'doctor_type',
+        fields = ('pk', 'initiator', 'followers', 'origin_from', 'describe', 'doctor_type',
                   'doctor_address', 'disease_type', 'task', 'crowd', 'created_time', 'praise', 'top')

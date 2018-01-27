@@ -54,7 +54,7 @@ class Task(models.Model):
     # 任务开始时间
     task_start_time = models.DateTimeField(auto_now_add=True)
     # 任务状态
-    task_state = models.CharField(max_length=70, blank=True, choices=STATE_CHOICES)
+    task_state = models.CharField(max_length=70, blank=True, choices=STATE_CHOICES, default="01")
 
     def __str__(self):
         return str(self.pk) + ", 任务概要:" + self.task_outline
@@ -93,9 +93,10 @@ class Subject(models.Model):
     # 话题发起人(一对多)
     # 如果有多个ManyToManyField指向同一个Model,这样反向查询FOO_set的时候就无法弄清是哪个ManyToManyField字段了,可以禁止反向关系:
     # http://www.cnblogs.com/linxiyue/p/3667418.html
-    initiator = models.ForeignKey(User, null=True, blank=True, related_name='u+')
+    # initiator = models.ForeignKey(User, null=True, blank=True, related_name='u+')
+    initiator = models.ForeignKey(User, null=True, blank=True, related_name='subjects_for_initiator')
     # 话题关注者(多对多)
-    followers = models.ManyToManyField(User, blank=True, related_name='ref+')
+    followers = models.ManyToManyField(User, blank=True, related_name='subjects_for_followers')
     # 话题来源途径
     origin_from = models.CharField(max_length=70, blank=True, choices=FROM_CHOICES)
     # 话题描述

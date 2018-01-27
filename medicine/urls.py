@@ -7,6 +7,12 @@ urlpatterns = [
     url(r'^getObjects/$', views.get_objects, name='index'),
     url(r'^getSubjects/$', views.get_subjects, name='subject_list'),
     url(r'^subject/(?P<pk>[0-9]+)/$', views.detail, name='detail'),
-    # add_new_subject
+    #
     url(r'^addSubject/$', views.add_new_subject, name='add_new_subject'),
+    url(r'^editSubject/$', views.edit_subject, name='edit_subject'),
+    url(r'^deleteSubject/$', views.delete_subject, name='delete_subject'),
+    url(r'^praise/$', views.praise, name='praise'),
+    url(r'^follower/$', views.follower, name='follower'),
+    url(r'^acceptTask/$', views.accept_task, name='accept_task'),
+    url(r'^abandonTask/$', views.abandon_task, name='abandon_task'),
 ]
