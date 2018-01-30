@@ -7,7 +7,7 @@ from medicine.models import Subject, User, Crowd, Task, TaskProgress, Top
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ('pk','name', 'telephone', 'age', 'address',)
+        fields = ('pk', 'name', 'telephone', 'age', 'address',)
 
 
 # class UserFollowerSerializer(serializers.HyperlinkedModelSerializer):
@@ -44,7 +44,7 @@ class TaskProgressSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = TaskProgress
-        fields = ('task', 'des', 'path', 'task_progress_time',)
+        fields = ('pk', 'task', 'des', 'path', 'task_progress_time', 'created_time',)
 
 
 class TopSerializer(serializers.HyperlinkedModelSerializer):

@@ -1,0 +1,11 @@
+git的忽略文件配置
+.gitignore 中要写上 workspace.xml
+
+
+如果已经不幸之前commit workspace.xml 的话，必须执行以下命令
+
+
+$ Git rm --cached .idea/workspace.xml
+
+
+移除对已经管理的文件的管理:http://blog.csdn.net/jujishou521/article/details/52185787

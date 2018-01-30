@@ -131,7 +131,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 MEDIA_ROOT = BASE_DIR + '/media/'  # BASE_DIR 是项目所在的目录，这样文件就会存储在当前的开发目录下的一个`media`的文件夹下
-
+MEDIA_URL = '/media/'
 # REST_FRAMEWORK 有关的, 后加的为了实现返回合适的Json数据格式
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,

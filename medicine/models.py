@@ -12,7 +12,7 @@ class User(models.Model):
     address = models.CharField(max_length=70, blank=True)
 
     def __str__(self):
-        return "用户:" + self.name
+        return "用户:" + str(self.pk) + self.name
 
 
 # @python_2_unicode_compatible  # 因为继承于User,因此该表中所以数据都包含在User表中
@@ -66,14 +66,19 @@ class TaskProgress(models.Model):
     # 一个任务对应多个任务过程
     task = models.ForeignKey(Task, null=True, blank=True)
     # 执行任务记录描述
-    des = models.CharField(max_length=70, blank=True, default="执行任务记录描述")
+    des = models.TextField(blank=True, default="执行任务记录描述")
     # 任务执行中所拍摄的图片
     path = models.FileField(upload_to='image/', blank=True)
     # 任务进展时间
     task_progress_time = models.DateTimeField(auto_now_add=True)
+    # 任务首次创建的时间
+    created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return "执行任务记录描述:" + self.des
+
+    class Meta:
+        ordering = ['-created_time']
 
 
 @python_2_unicode_compatible  # 兼容python2

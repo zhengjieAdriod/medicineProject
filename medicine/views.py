@@ -8,8 +8,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from medicine.models import Subject, User, Crowd, Task, Top
-from medicine.serializers import SubjectSerializer, UserSerializer
+from medicine.models import Subject, User, Crowd, Task, Top, TaskProgress
+from medicine.serializers import SubjectSerializer, UserSerializer, TaskProgressSerializer
 
 
 # 两个注解都与rest_framework有关
@@ -30,7 +30,7 @@ def get_objects(request):
     return Response({"code": "200", "subject": sData, "subjects": sDatas})
 
 
-# 分页
+# 分页,按病分类.(无参数,则是全部)
 @api_view(['GET'])
 @permission_classes((AllowAny,))
 def get_subjects(request):
@@ -62,11 +62,17 @@ def get_subjects(request):
 @permission_classes((AllowAny,))
 def detail(request, pk):
     subject_json = {}
+    task_progresses = []
     subjects = Subject.objects.filter(pk=pk)
     if len(subjects) > 0:
-        subjects_serializer = SubjectSerializer(subjects[0], many=False)
+        subject_db = subjects[0]
+        task_db = subject_db.task
+        task_progresses_db = task_db.taskprogress_set.all()
+        task_progresses_serializer = TaskProgressSerializer(task_progresses_db, many=True)
+        task_progresses = task_progresses_serializer.data
+        subjects_serializer = SubjectSerializer(subject_db, many=False)
         subject_json = subjects_serializer.data
-    return Response({"code": "200", "subject": subject_json})
+    return Response({"code": "200", "subject": subject_json, "taskProgress": task_progresses})
 
 
 # 新增话题(任何人)
@@ -314,7 +320,79 @@ def abandon_task(request):
             return Response({"code": "200", "msg": "放弃任务成功"})
     return Response({"code": "400", "msg": "放弃任务失败"})
 
-    # todo  编辑任务的执行流程(话题发起人的权限)
-    # @api_view(['POST'])
-    # @permission_classes((AllowAny,))
-    # def
+
+# todo  添加任务的执行流程(话题发起人的权限)
+@api_view(['POST'])
+@permission_classes((AllowAny,))
+def add_task_progress(request):
+    data = request.data
+    # 获得文件
+    file_dic = request.FILES.dict()
+    subject_pk = data['pk']
+    user_pk = data['userPk']
+    # task_progress_pk = data['taskProgressPk']
+    des_str = data['des']
+    subjects_db = Subject.objects.filter(pk=subject_pk)
+    users_db = User.objects.filter(pk=user_pk)
+    if len(users_db) == 0:
+        return Response({"code": "400", "msg": "该用户不存在"})
+    if len(subjects_db) == 0:
+        return Response({"code": "400", "msg": "该话题不存在"})
+    user_db = users_db[0]
+    subject_db = subjects_db[0]
+    task_db = subject_db.task
+    tasks_accepted = user_db.task_set.all()
+    if task_db not in tasks_accepted:
+        return Response({"code": "400", "msg": "该任务的执行者不是该用户"})
+    new_task_progress = TaskProgress()
+    new_task_progress.des = des_str
+    for key, value in file_dic.items():
+        k = key
+        v = value
+        if 'progress_img' in k:
+            new_task_progress.path = v
+    new_task_progress.save()
+    task_db.taskprogress_set.add(new_task_progress)
+    return Response({"code": "200", "msg": "成功"})
+
+
+# todo  编辑或修改任务的执行流程(话题发起人的权限)
+@api_view(['POST'])
+@permission_classes((AllowAny,))
+def update_task_progress(request):
+    data = request.data
+    # 获得文件
+    file_dic = request.FILES.dict()
+    subject_pk = data['pk']
+    user_pk = data['userPk']
+    # task_progress_pk = data['taskProgressPk']
+    des_str = data['des']
+    task_progress_pk = data['taskProgressPk']
+    subjects_db = Subject.objects.filter(pk=subject_pk)
+    users_db = User.objects.filter(pk=user_pk)
+    task_progresses_db = TaskProgress.objects.filter(pk=task_progress_pk)
+
+    if len(users_db) == 0:
+        return Response({"code": "400", "msg": "该用户不存在"})
+    if len(subjects_db) == 0:
+        return Response({"code": "400", "msg": "该话题不存在"})
+    if len(task_progresses_db) == 0:
+        return Response({"code": "400", "msg": "该任务进度不存在"})
+
+    user_db = users_db[0]
+    subject_db = subjects_db[0]
+
+    task_db = subject_db.task
+    tasks_accepted = user_db.task_set.all()
+    if task_db not in tasks_accepted:
+        return Response({"code": "400", "msg": "该任务的执行者不是该用户"})
+    task_progress_db = task_progresses_db[0]  # 要编辑的对象
+    # new_task_progress = TaskProgress()
+    task_progress_db.des = des_str
+    for key, value in file_dic.items():
+        k = key
+        v = value
+        if 'progress_img' in k:  # progress_img图片文件的key
+            task_progress_db.path = v
+    task_progress_db.save()
+    return Response({"code": "200", "msg": "成功"})

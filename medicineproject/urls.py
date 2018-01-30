@@ -14,9 +14,18 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url, include
+from django.conf.urls.static import static
 from django.contrib import admin
+
+from medicineproject import settings
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'', include('medicine.urls')),
 ]
+# 在开发模式下,为了实现从数据库中拿到的图片路径可以直接访问
+if settings.DEBUG:
+    # urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    # 参数1,决定了在admin节目, 点击图片时,直接方法的地址为端口号之后, 直接拼接/media
+    # 参数2,告诉系统,文件的实际位置
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

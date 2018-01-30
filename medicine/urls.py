@@ -4,7 +4,7 @@ from . import views
 
 urlpatterns = [
     url(r'^$', views.get_objects, name='index'),
-    url(r'^getObjects/$', views.get_objects, name='index'),
+    url(r'^getObjects/$', views.get_objects, name='index'),  # 测试
     url(r'^getSubjects/$', views.get_subjects, name='subject_list'),
     url(r'^subject/(?P<pk>[0-9]+)/$', views.detail, name='detail'),
     #
@@ -15,4 +15,6 @@ urlpatterns = [
     url(r'^follower/$', views.follower, name='follower'),
     url(r'^acceptTask/$', views.accept_task, name='accept_task'),
     url(r'^abandonTask/$', views.abandon_task, name='abandon_task'),
+    url(r'^addTaskProgress/$', views.add_task_progress, name='add_task_progress'),
+    url(r'^updateTaskProgress/$', views.update_task_progress, name='update_task_progress'),
 ]
