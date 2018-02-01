@@ -40,17 +40,23 @@ def get_subjects(request):
 
     try:
         subjects = Subject.objects.all()
-        disease_type = request.GET.get("disease")  # 疾病名称
-        if disease_type is not None:  # 疾病分类
-            subjects = subjects.filter(disease_type=disease_type)
+
+        doctor_type = request.GET.get("doctorType")  # 中医或者西医
+        if doctor_type is not None and len(doctor_type) > 0:
+            subjects = subjects.filter(doctor_type=doctor_type)
+        total_size = subjects.count()
         page = request.GET.get("page")
         if page is not None:  # 分页
-            paginator = Paginator(subjects, 1)  # 每页显示 2 条数据
+            paginator = Paginator(subjects, 3)  # 每页显示 2 条数据
+            page_num = page  # 當前頁
             page_size = paginator.per_page  # 每页几条数据
             total_page = paginator.num_pages  # 一共多少页数据
             subjects = paginator.page(page)
+
         subjects_serializer = SubjectSerializer(subjects, many=True)
+
         return Response({"code": "200", "page_size": page_size, "page_num": page_num, "total_page": total_page,
+                         'total_size': total_size,
                          "subject_list": subjects_serializer.data})
     except PageNotAnInteger:
         return Response({"code": "400", "error_msg": "访问出错"})
@@ -97,7 +103,7 @@ def add_new_subject(request):  # 只是新增主题, 不涉及图片
         new_crowd.crowd_funding = crowd_dic["crowd_funding"]
         new_crowd.crowd_progress = crowd_dic["crowd_progress"]
         # new_crowd.crowd_providers = crowd_dic['crowd_providers'] #众筹参与者
-
+        title_str = subject_dic["title"]  # 话题描述参数
         describe_str = subject_dic["describe"]  # 话题描述参数
         disease_type_str = subject_dic['disease_type']  # 疾病类型
         doctor_address_str = subject_dic['doctor_address']  # 医生地址
@@ -123,6 +129,7 @@ def add_new_subject(request):  # 只是新增主题, 不涉及图片
 
     new_subject = Subject()  # 新增话题
     new_subject.initiator = user_db
+    new_subject.title = title_str
     new_subject.describe = describe_str
     new_subject.disease_type = disease_type_str
     new_subject.doctor_address = doctor_address_str
@@ -179,6 +186,7 @@ def edit_subject(request):
         task_db.task_outline = subject_dic['task']['task_outline']
         task_db.save()
 
+        title_str = subject_dic["title"]  # 话题标题参数
         describe_str = subject_dic["describe"]  # 话题描述参数
         disease_type_str = subject_dic['disease_type']  # 疾病类型
         doctor_address_str = subject_dic['doctor_address']  # 医生地址
@@ -187,6 +195,7 @@ def edit_subject(request):
         praise = 0  # 点赞数
     except KeyError as e:
         return Response({"code": "400", "errorMsg": e})
+    subject_db.title = title_str
     subject_db.describe = describe_str
     subject_db.disease_type = disease_type_str
     subject_db.doctor_address = doctor_address_str

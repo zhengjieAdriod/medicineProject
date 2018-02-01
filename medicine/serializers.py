@@ -62,5 +62,5 @@ class SubjectSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Subject
-        fields = ('pk', 'initiator', 'followers', 'origin_from', 'describe', 'doctor_type',
+        fields = ('pk', 'initiator', 'followers', 'origin_from', 'title', 'describe', 'doctor_type',
                   'doctor_address', 'disease_type', 'task', 'crowd', 'created_time', 'praise', 'top')

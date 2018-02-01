@@ -20,7 +20,7 @@ class UserAdmin(admin.ModelAdmin):
 
 
 class SubjectAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'initiator', 'origin_from', 'doctor_type',
+    list_display = ['pk', 'title','initiator', 'origin_from', 'doctor_type',
                     'doctor_address', 'disease_type', 'task', 'crowd', 'created_time', 'praise', 'top']
 
 

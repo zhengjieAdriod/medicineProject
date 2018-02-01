@@ -104,13 +104,15 @@ class Subject(models.Model):
     followers = models.ManyToManyField(User, blank=True, related_name='subjects_for_followers')
     # 话题来源途径
     origin_from = models.CharField(max_length=70, blank=True, choices=FROM_CHOICES)
+    # 话题标题
+    title = models.CharField(max_length=100, blank=True)
     # 话题描述
     describe = models.TextField(blank=True)
     # 医家类别
     doctor_type = models.CharField(max_length=70, blank=True, choices=TYPE_CHOICES)
     # 医家地址
     doctor_address = models.CharField(max_length=100, blank=True)
-    # 求治疾病类别
+    # 求治疾病类别(糖尿病,腰间盘突出)
     disease_type = models.CharField(max_length=70, blank=True)
     # 任务实体
     task = models.OneToOneField(Task, null=True, blank=True)
