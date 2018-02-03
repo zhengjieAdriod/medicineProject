@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from medicine.models import Subject, User, Task, Crowd, Top, TaskProgress
+from medicine.models import Subject, User, Task, Crowd, Top, TaskProgress, FileBean
 
 
 # 用户
@@ -20,7 +20,7 @@ class UserAdmin(admin.ModelAdmin):
 
 
 class SubjectAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'title','initiator', 'origin_from', 'doctor_type',
+    list_display = ['pk', 'title', 'initiator', 'origin_from', 'doctor_type',
                     'doctor_address', 'disease_type', 'task', 'crowd', 'created_time', 'praise', 'top']
 
 
@@ -42,6 +42,10 @@ class TopAdmin(admin.ModelAdmin):
     list_display = ['is_top', 'top_time']
 
 
+class FileAdmin(admin.ModelAdmin):
+    list_display = ['des', 'path', 'post_time']
+
+
 admin.site.register(Subject, SubjectAdmin)
 # admin.site.register(UserInitiator, UserInitiatorAdmin)
 # admin.site.register(UserFollower, UserFollowerAdmin)
@@ -49,5 +53,6 @@ admin.site.register(User, UserAdmin)
 admin.site.register(Task, TaskAdmin)
 admin.site.register(Crowd, CrowdAdmin)
 admin.site.register(Top, TopAdmin)
+admin.site.register(FileBean, FileAdmin)
 admin.site.site_header = 'Medicine系统管理'
 admin.site.site_title = 'medicine'

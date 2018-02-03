@@ -17,4 +17,5 @@ urlpatterns = [
     url(r'^abandonTask/$', views.abandon_task, name='abandon_task'),
     url(r'^addTaskProgress/$', views.add_task_progress, name='add_task_progress'),
     url(r'^updateTaskProgress/$', views.update_task_progress, name='update_task_progress'),
+    url(r'^postPic/$', views.post_pic, name='post_pic'),
 ]

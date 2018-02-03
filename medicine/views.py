@@ -8,8 +8,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from medicine.models import Subject, User, Crowd, Task, Top, TaskProgress
+from medicine.models import Subject, User, Crowd, Task, Top, TaskProgress, FileBean
 from medicine.serializers import SubjectSerializer, UserSerializer, TaskProgressSerializer
+from medicineproject.context_processor import base_pic_url
 
 
 # 两个注解都与rest_framework有关
@@ -37,7 +38,6 @@ def get_subjects(request):
     page_size = 0
     page_num = 0
     total_page = 0
-
     try:
         subjects = Subject.objects.all()
 
@@ -88,10 +88,10 @@ def add_new_subject(request):  # 只是新增主题, 不涉及图片
     try:
         data = request.data
         # 获得文件
-        # file_dic = request.FILES.dict()
+        file_dic = request.FILES.dict()
         res_json = data['res']
-        post_dic = json.loads(res_json)  # 反序列化,将json串转为字典
-        subject_dic = post_dic["subject"]
+        subject_dic = json.loads(res_json)  # 反序列化,将json串转为字典
+        # subject_dic = post_dic["subject"]  # todo 去除了json 最前面的subject 字段
 
         initiator_dic = subject_dic["initiator"]  # 发起者(前提是已经注册登录)
         telephone = initiator_dic["telephone"]
@@ -103,8 +103,9 @@ def add_new_subject(request):  # 只是新增主题, 不涉及图片
         new_crowd.crowd_funding = crowd_dic["crowd_funding"]
         new_crowd.crowd_progress = crowd_dic["crowd_progress"]
         # new_crowd.crowd_providers = crowd_dic['crowd_providers'] #众筹参与者
-        title_str = subject_dic["title"]  # 话题描述参数
+        title_str = subject_dic["title"]  # 话题标题参数
         describe_str = subject_dic["describe"]  # 话题描述参数
+        content_str = subject_dic["content"]
         disease_type_str = subject_dic['disease_type']  # 疾病类型
         doctor_address_str = subject_dic['doctor_address']  # 医生地址
         doctor_type_str = subject_dic['doctor_type']  # 医生类型
@@ -122,15 +123,15 @@ def add_new_subject(request):  # 只是新增主题, 不涉及图片
         top_dic = subject_dic['top']
         new_top = Top()
         new_top.is_top = top_dic['is_top']
-        new_top.top_time = top_dic['top_time']
 
     except KeyError as e:
-        return Response({"code": "400", "errorMsg": e})
+        return Response({"code": "400", "msg": e})
 
     new_subject = Subject()  # 新增话题
     new_subject.initiator = user_db
     new_subject.title = title_str
     new_subject.describe = describe_str
+    new_subject.content = content_str
     new_subject.disease_type = disease_type_str
     new_subject.doctor_address = doctor_address_str
     new_subject.doctor_type = doctor_type_str
@@ -143,11 +144,16 @@ def add_new_subject(request):  # 只是新增主题, 不涉及图片
     new_subject.task = new_task
     new_top.save()
     new_subject.top = new_top
+    # for key, value in file_dic.items():
+    #     k = key
+    #     v = value
+    #     if "content" in k:
+    #         new_subject.content = v  # 话题内容是html的文件
     new_subject.save()
 
     # new_top.subject_set.add(new_subject)
 
-    return Response({"code": "200", "subject": ""})
+    return Response({"code": "200", "msg": "添加完成"})
 
 
 # 修改话题(话题发起人的权限)
@@ -157,10 +163,10 @@ def edit_subject(request):
     try:
         data = request.data
         # 获得文件
-        # file_dic = request.FILES.dict()
+        file_dic = request.FILES.dict()
         res_json = data['res']
-        post_dic = json.loads(res_json)  # 反序列化,将json串转为字典
-        subject_dic = post_dic["subject"]
+        subject_dic = json.loads(res_json)  # 反序列化,将json串转为字典
+        # subject_dic = post_dic["subject"] # todo 去除了json 最前面的subject 字段
         subject_pk = subject_dic["pk"]
         subject_dbs = Subject.objects.filter(pk=subject_pk)
         if len(subject_dbs) == 0:
@@ -188,6 +194,7 @@ def edit_subject(request):
 
         title_str = subject_dic["title"]  # 话题标题参数
         describe_str = subject_dic["describe"]  # 话题描述参数
+        content_str = subject_dic["content"]
         disease_type_str = subject_dic['disease_type']  # 疾病类型
         doctor_address_str = subject_dic['doctor_address']  # 医生地址
         doctor_type_str = subject_dic['doctor_type']  # 医生类型
@@ -197,11 +204,17 @@ def edit_subject(request):
         return Response({"code": "400", "errorMsg": e})
     subject_db.title = title_str
     subject_db.describe = describe_str
+    subject_db.content = content_str
     subject_db.disease_type = disease_type_str
     subject_db.doctor_address = doctor_address_str
     subject_db.doctor_type = doctor_type_str
     subject_db.origin_from = origin_from_str
     subject_db.praise = praise
+    # for key, value in file_dic.items():
+    #     k = key
+    #     v = value
+    #     if "content" in k:
+    #         subject_db.content = v  # 话题内容是html的文件
     subject_db.save()
     return Response({"code": "200", "success": "编辑成功"})
 
@@ -404,4 +417,28 @@ def update_task_progress(request):
         if 'progress_img' in k:  # progress_img图片文件的key
             task_progress_db.path = v
     task_progress_db.save()
-    return Response({"code": "200", "msg": "成功"})
+    return Response({"code": "200", "msg": "成功",
+                     "picUrl": base_pic_url(request).get("base_pic_url") + str(task_progress_db.path)})
+
+
+# 上传图片(包括文件),获得图片地址(包含用户id+上传时间)
+@api_view(['POST'])
+@permission_classes((AllowAny,))
+def post_pic(request):
+    data = request.data
+    user_pk = data['userPk']
+    user_db = User.objects.get(pk=user_pk)
+    if user_db is None:
+        return Response({"code": "400", "msg": "上传失败", "picUrl": ""})
+    # 获得文件
+    file_dic = request.FILES.dict()
+    for key, value in file_dic.items():
+        k = key
+        v = value
+        new_file_bean = FileBean()
+        new_file_bean.user_post = user_db
+        new_file_bean.path = v
+        new_file_bean.save()
+        base = base_pic_url(request).get("base_pic_url")
+        return Response({"code": "200", "msg": "上传成功",
+                         "picUrl": base + str(new_file_bean.path)})

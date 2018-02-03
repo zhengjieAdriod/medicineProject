@@ -1,3 +1,4 @@
+import time
 from django.db import models
 from django.urls import reverse
 from django.utils.encoding import python_2_unicode_compatible
@@ -90,6 +91,13 @@ class Top(models.Model):
         return "该话题是否被置顶:" + str(self.is_top)
 
 
+def user_directory_path(instance, filename):
+    # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
+    t = time.time()
+    time_str = str(round(t * 1000))  # 毫秒时间戳
+    return 'user_{0}_{1}/{2}'.format(str(instance), time_str, filename)
+
+
 # 话题
 @python_2_unicode_compatible  # 兼容python2
 class Subject(models.Model):
@@ -108,6 +116,8 @@ class Subject(models.Model):
     title = models.CharField(max_length=100, blank=True)
     # 话题描述
     describe = models.TextField(blank=True)
+    # 话题详细内容(html)
+    content = models.TextField(blank=True)
     # 医家类别
     doctor_type = models.CharField(max_length=70, blank=True, choices=TYPE_CHOICES)
     # 医家地址
@@ -127,7 +137,7 @@ class Subject(models.Model):
     top = models.ForeignKey(Top, null=True, blank=True)
 
     def __str__(self):
-        return self.disease_type
+        return str(self.pk)
 
         # 自定义 get_absolute_url 方法
         # 记得从 django.urls 中导入 reverse 函数
@@ -137,3 +147,20 @@ class Subject(models.Model):
 
     class Meta:
         ordering = ['-created_time']
+
+
+# 上传的文件实体
+@python_2_unicode_compatible  # 兼容python2
+class FileBean(models.Model):
+    user_post = models.ForeignKey(User, null=True, blank=True)
+    # 文件描述
+    des = models.TextField(blank=True, default="文件描述")
+    post_time = models.DateTimeField(auto_now_add=True)
+    # 文件路径upload = models.FileField(upload_to='uploads/%Y/%m/%d/')
+    path = models.FileField(upload_to=user_directory_path, blank=True)
+
+    def __str__(self):
+        return str(self.user_post.pk)
+
+    class Meta:
+        ordering = ['-post_time']
